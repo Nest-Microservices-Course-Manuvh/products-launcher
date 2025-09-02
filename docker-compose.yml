@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3'
 
 services:
 
@@ -17,10 +17,7 @@ services:
     environment:
       - PORT=3000
       - NATS_SERVERS=nats://nats-server:4222
-    develop:
-      watch:
-        - path: ./client-gateway/src
-          action: sync+restart
+
 
 
   products-ms:
@@ -32,16 +29,13 @@ services:
       - PORT=3001
       - NATS_SERVERS=nats://nats-server:4222
       - DATABASE_URL=file:./dev.db
-    develop:
-      watch:
-        - path: ./product-ms/src
-          action: sync+restart
+
 
   # Orders-MS
   orders-ms:
     depends_on:
       - orders-db
-    build: ./orders-microservice
+    build: ./orders-ms
     volumes:
       - ./orders-ms/src:/usr/src/app/src
     command: npm run start:dev
@@ -49,10 +43,6 @@ services:
       - PORT=3002
       - NATS_SERVERS=nats://nats-server:4222
       - DATABASE_URL=postgresql://postgres:123456@orders-db:5432/orders?schema=public
-    develop:
-      watch:
-        - path: ./orders-ms/src
-          action: sync+restart
 
   # Orders-DB
   orders-db:
@@ -60,7 +50,7 @@ services:
     image: postgres:16.2
     restart: always
     volumes:
-      - ./orders-microservice/postgres:/var/lib/postgresql/data
+      - ./orders-ms/postgres:/var/lib/postgresql/data
     ports:
       - 5432:5432
     environment:
